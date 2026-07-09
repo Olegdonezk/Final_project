@@ -13,13 +13,12 @@ class ReviewViewSet(viewsets.ModelViewSet):
         IsAuthenticatedOrReadOnly
     ]
 
-
     def get_queryset(self):
-        return Review.objects.all()
-
+        return Review.objects.select_related(
+            "booking",
+            "booking__tenant",
+            "booking__listing"
+        )
 
     def perform_create(self, serializer):
-
-        serializer.save(
-            user=self.request.user
-        )
+        serializer.save()

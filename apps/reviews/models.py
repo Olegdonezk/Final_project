@@ -1,23 +1,16 @@
 from django.db import models
-from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 
 class Review(models.Model):
 
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+    booking = models.OneToOneField(
+        "bookings.Booking",
         on_delete=models.CASCADE,
-        related_name="reviews",
-        verbose_name=_("Пользователь")
-    )
-
-    listing = models.ForeignKey(
-        "listings.Listing",
-        on_delete=models.CASCADE,
-        related_name="reviews",
-        verbose_name=_("Объявление")
+        related_name="review",
+        verbose_name=_("Бронирование")
     )
 
     rating = models.PositiveIntegerField(
@@ -48,13 +41,19 @@ class Review(models.Model):
         verbose_name_plural = _("Отзывы")
         ordering = ["-created_at"]
 
-        constraints = [
-            models.UniqueConstraint(
-                fields=["user", "listing"],
-                name="unique_user_listing_review"
+    def clean(self):
+        if self.booking.status != "completed":
+            raise ValidationError(
+                _("Отзыв можно оставить только после завершения аренды.")
             )
-        ]
 
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.user.email} → {self.listing.title} ({self.rating}/5)"
+        return (
+            f"{self.booking.tenant.email} → "
+            f"{self.booking.listing.title} "
+            f"({self.rating}/5)"
+        )

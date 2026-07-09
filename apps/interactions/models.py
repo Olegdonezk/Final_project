@@ -44,3 +44,9 @@ class ViewHistory(models.Model):
         verbose_name = _('История просмотра')
         verbose_name_plural = _('История просмотров')
         ordering = ['-viewed_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "listing"],
+                name="unique_listing_view"
+            )
+        ]

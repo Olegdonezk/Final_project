@@ -11,8 +11,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
         fields = [
             "id",
-            "user",
-            "listing",
+            "booking",
             "rating",
             "comment",
             "created_at",
@@ -20,51 +19,27 @@ class ReviewSerializer(serializers.ModelSerializer):
         ]
 
         read_only_fields = [
-            "user",
+            "id",
             "created_at",
             "updated_at",
         ]
 
-
-    def validate(self, attrs):
-
+    def validate_booking(self, booking):
         request = self.context["request"]
 
-        listing = attrs.get("listing")
-
-
-        # Проверяем, была ли завершённая бронь
-        has_completed_booking = Booking.objects.filter(
-            tenant=request.user,
-            listing=listing,
-            status=Booking.Status.COMPLETED
-        ).exists()
-
-
-        if not has_completed_booking:
+        if booking.tenant != request.user:
             raise serializers.ValidationError(
-                "Оставить отзыв можно только после завершённой брони."
+                "Вы можете оставить отзыв только на свою бронь."
             )
 
-
-        # Проверяем, нет ли уже отзыва
-        already_exists = Review.objects.filter(
-            user=request.user,
-            listing=listing
-        ).exists()
-
-
-        if already_exists:
+        if booking.status != Booking.Status.COMPLETED:
             raise serializers.ValidationError(
-                "Вы уже оставляли отзыв на это объявление."
+                "Оставить отзыв можно только после завершения брони."
             )
 
+        if hasattr(booking, "review"):
+            raise serializers.ValidationError(
+                "Для этой брони уже существует отзыв."
+            )
 
-        return attrs
-
-
-    def create(self, validated_data):
-
-        validated_data["user"] = self.context["request"].user
-
-        return super().create(validated_data)
+        return booking
