@@ -60,15 +60,21 @@ class ListingViewSet(viewsets.ModelViewSet):
         listing = self.get_object()
 
         # Увеличиваем количество просмотров
-        Listing.objects.filter(pk=listing.pk).update(
-            views_count=F("views_count") + 1
+        view, created = ViewHistory.objects.get_or_create(
+            user=request.user,
+            listing=listing,
         )
+
+        if created:
+            Listing.objects.filter(pk=listing.pk).update(
+                views_count=F("views_count") + 1
+            )
 
         listing.refresh_from_db()
 
         # Сохраняем историю просмотра только для авторизованных пользователей
         if request.user.is_authenticated:
-            ViewHistory.objects.create(
+            ViewHistory.objects.get_or_create(
                 user=request.user,
                 listing=listing
             )

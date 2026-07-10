@@ -1,8 +1,11 @@
 from rest_framework.routers import DefaultRouter
 
+from django.urls import path
+
 from .views import (
     SearchHistoryViewSet,
     ViewHistoryViewSet,
+    PopularSearchesView,
 )
 
 router = DefaultRouter()
@@ -20,3 +23,11 @@ router.register(
 )
 
 urlpatterns = router.urls
+
+urlpatterns += [
+    path(
+        "popular-searches/",
+        PopularSearchesView.as_view(),
+        name="popular-searches",
+    ),
+]
