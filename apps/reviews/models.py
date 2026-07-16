@@ -8,7 +8,7 @@ class Review(models.Model):
 
     booking = models.OneToOneField(
         "bookings.Booking",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="review",
         verbose_name=_("Бронирование")
     )

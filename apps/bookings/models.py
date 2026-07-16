@@ -26,7 +26,7 @@ class Booking(models.Model):
 
     listing = models.ForeignKey(
         Listing,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="bookings",
         verbose_name=_("Объявление")
     )
