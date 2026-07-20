@@ -1,0 +1,14 @@
+from rest_framework.permissions import BasePermission
+
+
+class IsReviewOwnerOrReadOnly(BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+
+        if request.method in ["GET", "HEAD", "OPTIONS"]:
+            return True
+
+        return (
+            request.user.is_authenticated
+            and obj.booking.tenant == request.user
+        )

@@ -3,6 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
 
 
 from .models import Booking
@@ -31,8 +32,13 @@ class BookingViewSet(viewsets.ModelViewSet):
 
         return Booking.objects.none()
 
-
     def perform_create(self, serializer):
+
+        if self.request.user.role != "tenant":
+            raise PermissionDenied(
+                "Только арендатор может создавать бронирования."
+            )
+
         serializer.save(
             tenant=self.request.user
         )

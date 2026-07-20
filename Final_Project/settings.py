@@ -12,25 +12,29 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 from datetime import timedelta
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
+load_dotenv(BASE_DIR / ".env")
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-1e7#lwa9_ig%i6yjpnfwyzi@qmia=2_-t1rw3wa6h7ah$!moue'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-# Разрешаем доступ из контейнеров и локально
-ALLOWED_HOSTS = ['*']
 
-# Application definition
+SECRET_KEY = os.getenv("SECRET_KEY")
+DEBUG = os.getenv("DEBUG", "False") == "True"
+ALLOWED_HOSTS = os.getenv(
+    "ALLOWED_HOSTS",
+    "127.0.0.1,localhost"
+).split(",")
+
+
+
+
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -40,13 +44,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Сторонние библиотеки (dependencies)
+
     'rest_framework',
     'rest_framework_simplejwt',
     'django_filters',
     'drf_spectacular',
+    'rest_framework_simplejwt.token_blacklist',
 
-    # Твои кастомные приложения из папки apps/
+
     "apps.users.apps.UsersConfig",
     "apps.listings.apps.ListingsConfig",
     "apps.bookings.apps.BookingsConfig",
@@ -86,8 +91,7 @@ WSGI_APPLICATION = 'Final_Project.wsgi.application'
 # 1. Указываем кастомную модель пользователя (email вместо username)
 AUTH_USER_MODEL = 'users.User'
 
-# Database (Переключаем с SQLite на MySQL с поддержкой Docker-окружения)
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
+
 
 DATABASES = {
     "default": {

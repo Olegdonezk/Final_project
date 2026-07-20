@@ -78,6 +78,8 @@ class Booking(models.Model):
             listing=self.listing,
             start_date__lt=self.end_date,
             end_date__gt=self.start_date,
+        ).exclude(
+            status=Booking.Status.CANCELLED
         )
 
         if self.pk:

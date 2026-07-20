@@ -2,10 +2,7 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 class IsOwnerOrReadOnly(BasePermission):
-    """
-    Разрешает просмотр всем.
-    Изменение и удаление только владельцу объявления.
-    """
+
 
     def has_object_permission(self, request, view, obj):
 
@@ -14,4 +11,7 @@ class IsOwnerOrReadOnly(BasePermission):
             return True
 
         # PATCH, PUT, DELETE только владельцу
-        return obj.owner == request.user
+        return (
+                request.user.is_authenticated
+                and obj.owner == request.user
+        )

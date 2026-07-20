@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView, ProfileView
+from .views import RegisterView, ProfileView,  LogoutView
 
 
 urlpatterns = [
@@ -13,4 +13,10 @@ urlpatterns = [
         ProfileView.as_view(),
         name="profile"
     ),
+
+    path(
+            "logout/",
+            LogoutView.as_view(),
+            name="logout"
+        ),
 ]

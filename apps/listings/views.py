@@ -59,27 +59,24 @@ class ListingViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         listing = self.get_object()
 
-        # Увеличиваем количество просмотров
-        view, created = ViewHistory.objects.get_or_create(
-            user=request.user,
-            listing=listing,
-        )
+        if request.user.is_authenticated:
 
-        if created:
-            Listing.objects.filter(pk=listing.pk).update(
-                views_count=F("views_count") + 1
+            view, created = ViewHistory.objects.get_or_create(
+                user=request.user,
+                listing=listing,
             )
+
+            if created:
+                Listing.objects.filter(
+                    pk=listing.pk
+                ).update(
+                    views_count=F("views_count") + 1
+                )
 
         listing.refresh_from_db()
 
-        # Сохраняем историю просмотра только для авторизованных пользователей
-        if request.user.is_authenticated:
-            ViewHistory.objects.get_or_create(
-                user=request.user,
-                listing=listing
-            )
-
         serializer = self.get_serializer(listing)
+
         return Response(serializer.data)
 
     def list(self, request, *args, **kwargs):
